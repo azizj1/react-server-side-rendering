@@ -1,0 +1,61 @@
+{
+  "name": "calendar-summary",
+  "version": "1.0.0",
+  "description": "Web app that summarizes my google calendar on a weekly basis",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack --progress --colors && node ./build/local.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azizj1/calendar-summary.git"
+  },
+  "author": "Aziz Javed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/azizj1/calendar-summary/issues"
+  },
+  "homepage": "https://github.com/azizj1/calendar-summary#readme",
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/runtime": "^7.0.0",
+    "@types/aws-lambda": "^8.10.11",
+    "@types/aws-serverless-express": "^3.0.1",
+    "@types/body-parser": "^1.17.0",
+    "@types/chalk": "^2.2.0",
+    "@types/cors": "^2.8.4",
+    "@types/debug": "^0.0.30",
+    "@types/lodash": "^4.14.134",
+    "@types/moment": "^2.13.0",
+    "@types/morgan": "^1.7.35",
+    "@types/swagger-ui-express": "^3.0.0",
+    "babel-loader": "^8.0.2",
+    "babel-plugin-lodash": "^3.3.4",
+    "clean-webpack-plugin": "^0.1.19",
+    "copy-webpack-plugin": "^4.5.2",
+    "nodemon": "^1.18.4",
+    "ts-loader": "^5.0.0",
+    "tslint": "^5.11.0",
+    "tslint-loader": "^3.6.0",
+    "typescript": "^3.0.3",
+    "webpack": "^4.17.2",
+    "webpack-cli": "^3.1.0",
+    "zip-webpack-plugin": "^3.0.0"
+  },
+  "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "body-parser": "^1.18.3",
+    "chalk": "^2.4.1",
+    "cors": "^2.8.4",
+    "debug": "^3.1.0",
+    "express": "^4.16.3",
+    "lodash": "^4.17.11",
+    "moment": "^2.22.2",
+    "morgan": "^1.9.0"
+  }
+}
