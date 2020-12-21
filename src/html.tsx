@@ -1,12 +1,38 @@
 import * as React from 'react';
+import * as ReactDOMServer from 'react-dom/server';
+import { promises as fs } from 'fs';
+import * as path from 'path';
 
 interface HtmlProps {
-  children: JSX.Element;
+  children: string;
   scripts: string[];
   stylesheets: string[];
 }
 
-export const Html = ({ children, scripts, stylesheets }: HtmlProps) => (
+const getAssets = (() => {
+  const assets = {
+    scripts: [] as string[],
+    stylesheets: [] as string[],
+  };
+  return async () => {
+    if (assets.scripts.length > 0) {
+      return assets;
+    }
+    const rawData = await fs.readFile(path.join(__dirname, 'client-assets.json'), 'utf8');
+    const data = Object.values(JSON.parse(rawData as unknown as string)) as {js?: string; css?: string}[];
+    data.forEach(({js, css}) => {
+      if (js) {
+        assets.scripts.push(js);
+      }
+      if (css) {
+        assets.stylesheets.push(css);
+      }
+    });
+    return assets;
+  };
+})();
+
+const Html = ({ children, scripts, stylesheets }: HtmlProps) => (
   <html>
     <head>
       <meta charSet='utf-8' />
@@ -55,10 +81,24 @@ export const Html = ({ children, scripts, stylesheets }: HtmlProps) => (
       <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,700' rel='stylesheet' />
       {stylesheets.map((href, i) => <link href={href} key={i} rel='stylesheet' />)}
     </head>
-    <body>
-      <h1>HELLO WORLD</h1>
-      {children}
-      {scripts.map((src, i) => <script type='text/javascript' src={src} key={i}></script>)}
+    <body data-scroll-animation='true' className='dark-theme'>
+        <div className='preloader' id='preloader'>
+            <div className='loader'></div>
+        </div>
+        <div id='root' dangerouslySetInnerHTML={{__html: children}}></div>
+        {scripts.map((src, i) => <script type='text/javascript' src={src} key={i}></script>)}
     </body>
   </html>
 );
+
+export const makePage = async (app: JSX.Element) => {
+  const { scripts, stylesheets } = await getAssets();
+  // `renderToString` is called on app but not html because `renderToString`
+  // creates internal DOM attributes on the node, allowing you to call
+  // hydrate() on it to attach event listeners on existing markup.
+  // We don't care about that for the HTML.
+  const appString = ReactDOMServer.renderToString(app);
+  const html = ReactDOMServer.renderToStaticMarkup(
+    <Html {...{scripts, stylesheets}}>{appString}</Html>);
+  return `<!doctype html>${html}`;
+};

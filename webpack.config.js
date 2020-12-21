@@ -219,10 +219,10 @@ clientConfig = function (env) {
     const config = {
         mode: DEBUG ? 'development' : 'production',
         entry: {
-          'main': [...vendors],
+          'main': [...vendors, './src/client/main.tsx'],
         },
         output: {
-            path: BUILD_DIR,
+            path: path.join(BUILD_DIR, 'public'),
             filename: '[name].js?[chunkhash]',
             publicPath: '/'
         },

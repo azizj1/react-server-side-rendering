@@ -3,3 +3,5 @@ build
 yarn-error.log
 .stats.json
 .terraform
+lambda.zip
+.DS_Store
