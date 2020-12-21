@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as logger from 'morgan';
 import * as cors from 'cors';
+const ejs = require('ejs');
 
 import chalk from 'chalk';
 import routes from './routes';
@@ -24,6 +25,10 @@ logger.token('status', (req : express.Request) => {
 });
 
 const app = express();
+app.set('view engine', 'ejs');
+// https://stackoverflow.com/questions/41707662/webpack-express-ejs-error-cannot-find-module
+app.engine('.ejs', ejs.__express);
+app.set('views', __dirname);
 app.use(cors());
 app.use(logger(':datetime :method :url :status :response-time ms - :res[content-length] bytes'));
 app.use(bodyParser.json());
