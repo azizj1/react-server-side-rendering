@@ -1,0 +1,133 @@
+@import 'variables';
+
+.menu {
+    margin-left: -1 * $menu-width; /* "#menu" width */
+    width: $menu-width;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000; /* so the menu or its navicon stays above all content */
+    background: #191818;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: all 0.2s ease-out;
+
+    &.active {
+        left: $menu-width;
+        width: $menu-width;
+    }
+
+    a {
+        color: #999;
+        border: none;
+        padding: 0.8em 0 0.8em 0.8em;
+    }
+
+    @media (min-width: $mobile) {
+        left: $menu-width;
+    }
+
+    :global(.pure-menu),
+    :global(.pure-menu ul) {
+        border: none;
+        background: transparent;
+    }
+
+    /*
+    Add that light border to separate items into groups.
+    */
+    :global(.pure-menu ul),
+    :global(.pure-menu .menu-item-divided) {
+        border-top: 1px solid #333;
+    }
+
+    /*
+    Change color of the anchor links on hover/focus.
+    */
+    :global(.pure-menu li a:hover),
+    :global(.pure-menu li a:focus) {
+        background: #333;
+    }
+
+    /*
+    This styles a link within a selected menu item `<li>`.
+    */
+    :global(.pure-menu-selected a.pure-menu-link) {
+        color: #fff;
+
+        &:visited {
+            color: #fff;
+        }
+    }
+
+    /*
+    This styles the menu heading.
+    */
+    :global(.pure-menu-heading) {
+        font-size: 125%;
+        font-weight: 300;
+        letter-spacing: 0.1em;
+        color: #fff;
+        margin-top: 0;
+        padding: 0.5em 0.8em;
+        text-transform: uppercase;
+    }
+}
+
+.menuLink {
+    transition: all 0.2s ease-out;
+    position: fixed;
+    display: block; /* show this only on small screens */
+    top: 0;
+    left: 0; /* "#menu width" */
+    background: #000;
+    background: rgba(0, 0, 0, 0.7);
+    font-size: 10px; /* change this value to increase/decrease button size */
+    z-index: 10;
+    width: 2em;
+    height: auto;
+    padding: 2.1em 1.6em;
+
+    &.active {
+        left: $menu-width;
+    }
+
+    &:hover,
+    &:focus {
+        background: #000;
+    }
+
+    span {
+        position: relative;
+        display: block;
+
+        &,
+        &::before,
+        &::after {
+            background-color: #fff;
+            width: 100%;
+            height: 0.2em;
+        }
+
+        &::before,
+        &::after {
+            position: absolute;
+            margin-top: -0.6em;
+            content: ' ';
+        }
+
+        &::after {
+            margin-top: 0.6em;
+        }
+    }
+    @media (min-width: $mobile) {
+        position: fixed;
+        left: $menu-width;
+        display: none;
+
+        &.active {
+            left: $menu-width;
+        }
+    }
+}

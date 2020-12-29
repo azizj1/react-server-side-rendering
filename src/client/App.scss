@@ -1,0 +1,96 @@
+@import 'variables';
+
+body {
+    color: #777;
+    line-height: 1.6;
+}
+
+.root {
+    transition: all 0.2s ease-out;
+    position: relative;
+    left: 0;
+    padding-left: 0;
+
+    .content {
+        margin: 0 auto;
+        line-height: 1.6em;
+
+        h2,
+        h3 {
+            margin: 50px 0 20px 0;
+            font-weight: 300;
+            color: #888;
+        }
+
+        h3 {
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+    }
+
+    .header {
+        margin: 0;
+        color: #333;
+        text-align: center;
+        padding: 2.5em 2em 0;
+        border-bottom: 1px solid #eee;
+
+        h1 {
+            margin: 0;
+            font-size: 3em;
+            font-weight: 300;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-weight: 300;
+            font-size: 1.2em;
+            color: #ccc;
+            padding: 0;
+            margin-top: 0;
+        }
+    }
+
+    .loader {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 2em;
+    }
+
+    .error {
+        margin: 2em 0.5em 0 0.5em;
+        width: auto;
+
+        @media (min-width: $mobile) {
+            margin-left: 2em;
+            margin-right: 2em;
+        }
+    }
+
+    /*
+    Hides the menu at `$mobile` (768px), but modify this based on your app's needs.
+    */
+    @media (min-width: $mobile) {
+        padding-left: $menu-width; /* left col width "#menu" */
+        left: 0;
+
+        .header {
+            padding-left: 2em;
+            padding-right: 2em;
+        }
+    }
+
+    @media (max-width: $mobile) {
+        /* Only apply this when the window is small. Otherwise, the following
+        case results in extra padding on the left:
+            * Make the window small.
+            * Tap the menu to trigger the active state.
+            * Make the window large again.
+        */
+        &.active {
+            position: relative;
+            left: $menu-width;
+        }
+    }
+}

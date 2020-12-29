@@ -6,6 +6,8 @@ const ZipPlugin = require('zip-webpack-plugin');
 const AssetsPlugin = require('assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
+const WaitPlugin = require('./webpack-util/waitplugin');
+const ZipDirectoryPlugin = require('./webpack-util/ZipDirectoryPlugin');
 
 const STYLELINT_CONFIG = {
     files: 'src/**/*.scss',
@@ -80,7 +82,7 @@ const moduleRules = (debug, babelConfig) => [
     test: /\.scss$/,
     include: /src/,
     use: [
-        debug ? 'style-loader' : MiniCssExtractPlugin.loader,
+        'isomorphic-style-loader',
         {
             loader: 'css-loader',
             options: cssConfig(true, debug)
@@ -91,7 +93,7 @@ const moduleRules = (debug, babelConfig) => [
         },
         {
             loader: 'sass-loader',
-            options: { sourceMap: debug, includePaths: [path.join(__dirname, 'src/shared/styles/')] }
+            options: { sourceMap: debug, includePaths: [path.join(__dirname, 'src/client/shared/styles/')] }
         }
     ]
 },
@@ -99,7 +101,7 @@ const moduleRules = (debug, babelConfig) => [
     test: /\.css$/,
     include: /(vendor|node_modules[\\\/]react-select|node_modules[\\\/]rc-slider)/,
     use: [
-        debug ? 'style-loader' : MiniCssExtractPlugin.loader,
+        MiniCssExtractPlugin.loader,
         {
             loader: 'css-loader',
             options: cssConfig(false, debug)
@@ -114,7 +116,7 @@ const moduleRules = (debug, babelConfig) => [
     test: /\.scss$/,
     include: /vendor/,
     use: [
-        debug ? 'style-loader' : MiniCssExtractPlugin.loader,
+        MiniCssExtractPlugin.loader,
         {
             loader: 'css-loader',
             options: cssConfig(false, debug)
@@ -192,8 +194,7 @@ serverConfig = function (env) {
             new StyleLintPlugin(STYLELINT_CONFIG),
             ... DEBUG ? [] : [
                 new CleanPlugin([BUILD_DIR]),
-                new ZipPlugin({filename: 'lambda.zip', path: path.join(__dirname, 'terraform/modules/lambda')}),
-            ]
+            ],
         ],
         cache: DEBUG,
         stats: STATS
@@ -258,4 +259,22 @@ clientConfig = function (env) {
     return config;
 }
 
-module.exports = [serverConfig, clientConfig];
+const lambdaConfig = {
+  mode: 'none',
+  entry: './webpack-util/empty.js',
+  output: {
+    path: BUILD_DIR,
+    filename: 'empty.js',
+  },
+  plugins: [
+      new WaitPlugin({filename: path.join(BUILD_DIR, 'client-assets.json')}),
+      new WaitPlugin({filename: path.join(BUILD_DIR, 'server-assets.json')}),
+      new ZipDirectoryPlugin({
+        directory: BUILD_DIR,
+        zipFileName: 'lambda.zip',
+        outputDir: path.join(__dirname, 'terraform/modules/lambda'),
+      }),
+  ]
+};
+
+module.exports = [serverConfig, clientConfig, lambdaConfig];

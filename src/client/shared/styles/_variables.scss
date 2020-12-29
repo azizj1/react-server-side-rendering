@@ -1,0 +1,43 @@
+/* ==========================================================================
+ * FONTS
+ * ========================================================================== */
+
+$primary-font          :'Roboto', sans-serif;
+$secondary-font          :'powerbass', 'Roboto', sans-serif;
+
+$bold                  : 700;
+$regular               : 400;
+$light                 : 300;
+$thin                  : 100;
+
+/* ==========================================================================
+ * COLORS
+ * ========================================================================== */
+
+$primary-color         :#3498db;
+$secondary-color       :#3fb125;
+$white                 :#6e6868;
+$light                 :#f0f4f6;
+$light-gray-color      :#999;
+$dark                  :#2a2e2f;
+$gray                  :#383e40;
+$black                 :#000;
+$muted                 :#a1a4ab;
+$darkmuted             :#9fa6b1;
+$blue                  :linear-gradient(to right, #1fb1ff 0%, #00a9ff 100%);
+$red                   :#ed3d3d;// ee6363; // c60c30
+$light-green           :#11d5aa;  // 11d5aa to 00d3a2
+$yellow                :linear-gradient(to right, #ffe900 0%, #ffed27 100%);
+$violet                :linear-gradient(to right, #2d02ef 2%, #5936f0 100%);
+
+$motion-duration-response: 300ms;
+$motion-duration-transition: 600ms;
+
+$motion-timing-outro: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+$motion-timing-intro: cubic-bezier(0.23, 1, 0.32, 1);
+$motion-timing-transfer: cubic-bezier(0.86, 0, 0.07, 1);
+$motion-timing-default: linear;
+$menu-width: 220px;
+$mobile: 769px;
+$md-desktop: 992px;
+$font-size-min: 0.75rem;

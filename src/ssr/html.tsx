@@ -1,12 +1,16 @@
 import * as React from 'react';
 import * as ReactDOMServer from 'react-dom/server';
-import { promises as fs } from 'fs';
 import * as path from 'path';
+import { promises as fs } from 'fs';
+import { INITIAL_STATE_KEY } from './data-cache';
+import * as StyleContext from 'isomorphic-style-loader/StyleContext';
 
-interface HtmlProps {
+interface HtmlProps<T> {
   children: string;
   scripts: string[];
   stylesheets: string[];
+  inlineStyles: Set<string>;
+  initialState?: T;
 }
 
 const getAssets = (() => {
@@ -28,12 +32,15 @@ const getAssets = (() => {
         assets.stylesheets.push(css);
       }
     });
+    assets.scripts.sort((a, b) => b.localeCompare(a));
+    assets.stylesheets.sort((a, b) => b.localeCompare(a));
     return assets;
   };
 })();
 
-const Html = ({ children, scripts, stylesheets }: HtmlProps) => (
-  <html>
+export function Html<T>({ children, scripts, stylesheets, initialState, inlineStyles }: HtmlProps<T>) {
+  return (
+    <html>
     <head>
       <meta charSet='utf-8' />
       <meta name='keywords' content='Aziz,BJJ' />
@@ -61,12 +68,12 @@ const Html = ({ children, scripts, stylesheets }: HtmlProps) => (
               left: 50%;
               transform: translate(-50%, -50%);
           }
-
           @keyframes spin {
               0% { transform: rotate(0deg); }
               100% { transform: rotate(360deg); }
           }
       `}</style>
+      <style dangerouslySetInnerHTML={{__html: [...inlineStyles].join('')}}></style>
       <script dangerouslySetInnerHTML={{__html: `
           (function() {
               var redirect = sessionStorage.redirect;
@@ -81,6 +88,12 @@ const Html = ({ children, scripts, stylesheets }: HtmlProps) => (
       <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,700' rel='stylesheet' />
       {stylesheets.map((href, i) => <link href={href} key={i} rel='stylesheet' />)}
     </head>
+    {initialState &&
+      <script dangerouslySetInnerHTML={{__html: `
+        window.${INITIAL_STATE_KEY} = ${JSON.stringify(initialState)};
+      `}}>
+      </script>
+    }
     <body data-scroll-animation='true' className='dark-theme'>
         <div className='preloader' id='preloader'>
             <div className='loader'></div>
@@ -89,16 +102,26 @@ const Html = ({ children, scripts, stylesheets }: HtmlProps) => (
         {scripts.map((src, i) => <script type='text/javascript' src={src} key={i}></script>)}
     </body>
   </html>
-);
+  );
+}
 
-export const makePage = async (app: JSX.Element) => {
+
+function addCss(cssCache: Set<string>, app: JSX.Element) {
+  const insertCss = (...styles: Style[]) => styles.forEach(s => cssCache.add(s._getCss()));
+  return (
+    <StyleContext.Provider value={{insertCss}}>{app}</StyleContext.Provider>
+  );
+}
+
+export default async function makePage<T>(app: JSX.Element, initialState: T) {
   const { scripts, stylesheets } = await getAssets();
   // `renderToString` is called on app but not html because `renderToString`
   // creates internal DOM attributes on the node, allowing you to call
   // hydrate() on it to attach event listeners on existing markup.
   // We don't care about that for the HTML.
-  const appString = ReactDOMServer.renderToString(app);
+  const css = new Set<string>();
+  const appString = ReactDOMServer.renderToString(addCss(css, app));
   const html = ReactDOMServer.renderToStaticMarkup(
-    <Html {...{scripts, stylesheets}}>{appString}</Html>);
+    <Html {...{scripts, stylesheets, initialState}} inlineStyles={css}>{appString}</Html>);
   return `<!doctype html>${html}`;
-};
+}
