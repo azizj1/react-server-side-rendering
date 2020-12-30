@@ -32,9 +32,11 @@ class ZipDirectoryPlugin {
         // if directory = /Users/azizj1/proj/build/, then files like
         // /Users/azizj1/proj/build/f1.txt and /Users/azizj1/proj/build/public/f2.txt
         // need to become f1.txt and public/f2.txt in the zip folder.
-        files.forEach(f => zipfile.addFile(f, path.relative(this.directory, f)));
+        for (const f of files) {
+          zipfile.addFile(f, path.relative(this.directory, f));
+        }
+        zipfile.end();
       });
-      zipfile.end();
       zipfile.outputStream.on('data', buff => buffers.push(buff));
       zipfile.outputStream.on('end', () => {
         const outputPathAndFilename = path.resolve(this.outputDir, this.zipFileName);

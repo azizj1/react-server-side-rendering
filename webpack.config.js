@@ -2,12 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const CleanPlugin = require('clean-webpack-plugin');
-const ZipPlugin = require('zip-webpack-plugin');
 const AssetsPlugin = require('assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
 const WaitPlugin = require('./webpack-util/waitplugin');
 const ZipDirectoryPlugin = require('./webpack-util/ZipDirectoryPlugin');
+
+const CLIENT_ASSETS_FILE = 'client-assets.json';
+const SERVER_ASSETS_FILE = 'server-assets.json';
 
 const STYLELINT_CONFIG = {
     files: 'src/**/*.scss',
@@ -136,7 +138,6 @@ const BABEL_PLUGINS = (debug) => [
   '@babel/plugin-proposal-class-properties',
   '@babel/plugin-proposal-object-rest-spread',
   '@babel/transform-runtime',
-  'lodash',
   ...debug ? [] : [
       'transform-react-remove-prop-types',
       '@babel/plugin-transform-react-constant-elements'
@@ -188,13 +189,11 @@ serverConfig = function (env) {
             rules: moduleRules(DEBUG, BABEL_CONFIG)
         },
         plugins: [
+            new AssetsPlugin({ path: BUILD_DIR, filename: SERVER_ASSETS_FILE }),
             new webpack.DefinePlugin(GLOBALS),
             new MiniCssExtractPlugin({filename: '[name].css?[contenthash]'}),
-            new AssetsPlugin({ path: BUILD_DIR, filename: 'server-assets.json'}),
             new StyleLintPlugin(STYLELINT_CONFIG),
-            ... DEBUG ? [] : [
-                new CleanPlugin([BUILD_DIR]),
-            ],
+            ...DEBUG ? [] : [new CleanPlugin([BUILD_DIR])],
         ],
         cache: DEBUG,
         stats: STATS
@@ -238,11 +237,11 @@ clientConfig = function (env) {
             rules: moduleRules(DEBUG, BABEL_CONFIG)
         },
         plugins: [
-            new CleanPlugin([BUILD_DIR]),
-            new AssetsPlugin({ path: BUILD_DIR, filename: 'client-assets.json'}),
+            new AssetsPlugin({ path: BUILD_DIR, filename: CLIENT_ASSETS_FILE }),
             new StyleLintPlugin(STYLELINT_CONFIG),
             new webpack.DefinePlugin(GLOBALS),
             new MiniCssExtractPlugin({filename: '[name].css?[contenthash]'}),
+            ...DEBUG ? [] : [new CleanPlugin([BUILD_DIR])],
         ],
         optimization: {
           splitChunks: {
@@ -259,22 +258,29 @@ clientConfig = function (env) {
     return config;
 }
 
-const lambdaConfig = {
-  mode: 'none',
-  entry: './webpack-util/empty.js',
-  output: {
-    path: BUILD_DIR,
-    filename: 'empty.js',
-  },
-  plugins: [
-      new WaitPlugin({filename: path.join(BUILD_DIR, 'client-assets.json')}),
-      new WaitPlugin({filename: path.join(BUILD_DIR, 'server-assets.json')}),
-      new ZipDirectoryPlugin({
-        directory: BUILD_DIR,
-        zipFileName: 'lambda.zip',
-        outputDir: path.join(__dirname, 'terraform/modules/lambda'),
-      }),
-  ]
-};
+lambdaConfig = function (env) {
+  const DEBUG = env !== 'prod' && env !== 'dev';
+  const plugins = [
+        new WaitPlugin({filename: path.join(BUILD_DIR, CLIENT_ASSETS_FILE)}),
+        new WaitPlugin({filename: path.join(BUILD_DIR, SERVER_ASSETS_FILE)}),
+        new ZipDirectoryPlugin({
+          directory: BUILD_DIR,
+          zipFileName: 'lambda.zip',
+          outputDir: path.join(__dirname, 'terraform/modules/lambda'),
+        }),
+    ];
+
+  const config = {
+    mode: 'none',
+    entry: './webpack-util/empty.js',
+    output: {
+      path: BUILD_DIR,
+      filename: 'empty.js',
+    },
+    plugins: DEBUG ? [] : plugins,
+  };
+
+  return config;
+}
 
 module.exports = [serverConfig, clientConfig, lambdaConfig];
