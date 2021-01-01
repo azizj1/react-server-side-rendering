@@ -5,7 +5,7 @@ const CleanPlugin = require('clean-webpack-plugin');
 const AssetsPlugin = require('assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
-const WaitPlugin = require('./webpack-util/waitplugin');
+const WaitPlugin = require('./webpack-util/WaitPlugin');
 const ZipDirectoryPlugin = require('./webpack-util/ZipDirectoryPlugin');
 
 const CLIENT_ASSETS_FILE = 'client-assets.json';
@@ -84,6 +84,8 @@ const moduleRules = (debug, babelConfig) => [
     test: /\.scss$/,
     include: /src/,
     use: [
+      // styles that we write (which would be sass in src/) need to get inlined
+      // in the html template. To do that, we use the isomorphic-style-loader.
         'isomorphic-style-loader',
         {
             loader: 'css-loader',
@@ -103,6 +105,8 @@ const moduleRules = (debug, babelConfig) => [
     test: /\.css$/,
     include: /(vendor|node_modules[\\\/]react-select|node_modules[\\\/]rc-slider)/,
     use: [
+      // styles we didn't write (which would be in vendor/ or node_modules/)
+      // need to get bundled into a stylesheet like main.css.
         MiniCssExtractPlugin.loader,
         {
             loader: 'css-loader',
@@ -118,6 +122,8 @@ const moduleRules = (debug, babelConfig) => [
     test: /\.scss$/,
     include: /vendor/,
     use: [
+      // styles we didn't write (which would be in vendor/ or node_modules/)
+      // need to get bundled into a stylesheet like main.css.
         MiniCssExtractPlugin.loader,
         {
             loader: 'css-loader',
@@ -157,7 +163,7 @@ serverConfig = function (env) {
         babelrc: false,
         presets: [
             '@babel/react',
-            ['@babel/env', { 'targets': { 'node': '8.10' } }]
+            ['@babel/env', { 'targets': { 'node': '12.16' } }]
         ],
         plugins: BABEL_PLUGINS(DEBUG),
         cacheDirectory: DEBUG

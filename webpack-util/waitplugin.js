@@ -2,6 +2,7 @@ const WebpackBeforeBuildPlugin = require('before-build-webpack');
 const fs = require('fs');
 
 class WaitPlugin extends WebpackBeforeBuildPlugin {
+  // every 100ms, check for the existence of a file for 30s
   constructor({filename, interval = 100, timeout = 30000}) {
     super(function(_, callback) {
       let start = Date.now();
